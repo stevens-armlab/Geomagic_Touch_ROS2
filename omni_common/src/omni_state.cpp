@@ -1,6 +1,5 @@
 /*
  *  Copyright (c) 2022 Ivo Dekker ACRO Diepenbeek KULeuven
-
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
  files (the "Software"), to deal in the Software without
@@ -9,10 +8,8 @@
  copies of the Software, and to permit persons to whom the
  Software is furnished to do so, subject to the following
  conditions:
-
  The above copyright notice and this permission notice shall be
  included in all copies or substantial portions of the Software.
-
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -113,35 +110,35 @@ public:
         stream1 << omni_name << "/button";
         std::string button_topic = std::string(stream1.str());
         button_publisher = node_->create_publisher<omni_msgs::msg::OmniButtonEvent>(button_topic.c_str(), 100);
-        RCLCPP_INFO(node_->get_logger(), "Publishing button events on: " + button_topic);
+        RCLCPP_INFO(node_->get_logger(), "Publishing button events on: %s", button_topic.c_str());
 
         // Publish on NAME/state
         std::ostringstream stream2;
         stream2 << omni_name << "/state";
         std::string state_topic_name = std::string(stream2.str());
         state_publisher = node_->create_publisher<omni_msgs::msg::OmniState>(state_topic_name.c_str(), 1);
-        RCLCPP_INFO(node_->get_logger(), "Publishing omni state on: " + state_topic_name);
+        RCLCPP_INFO(node_->get_logger(), "Publishing omni state on: %s", state_topic_name.c_str());
 
         // Subscribe to NAME/force_feedback
         std::ostringstream stream3;
         stream3 << omni_name << "/force_feedback";
         std::string force_feedback_topic = std::string(stream3.str());
         haptic_sub = node_->create_subscription<omni_msgs::msg::OmniFeedback>(force_feedback_topic.c_str(), 1, std::bind(&PhantomROS::force_callback, this, std::placeholders::_1));
-        RCLCPP_INFO(node_->get_logger(), "listening to: " + force_feedback_topic + " for haptic info");
+        RCLCPP_INFO(node_->get_logger(), "listening to: %s for haptic info", force_feedback_topic.c_str());
 
         // Publish on NAME/pose
         std::ostringstream stream4;
         stream4 << omni_name << "/pose";
         std::string pose_topic_name = std::string(stream4.str());
         pose_publisher = node_->create_publisher<geometry_msgs::msg::PoseStamped>(pose_topic_name.c_str(), 1);
-        RCLCPP_INFO(node_->get_logger(), "Publishing pose on: " + pose_topic_name);
+        RCLCPP_INFO(node_->get_logger(), "Publishing pose on: %s", pose_topic_name.c_str());
 
         // Publish on NAME/joint_states
         std::ostringstream stream5;
         stream5 << omni_name << "/joint_states";
         std::string joint_topic_name = std::string(stream5.str());
         joint_publisher = node_->create_publisher<sensor_msgs::msg::JointState>(joint_topic_name.c_str(), 1);
-        RCLCPP_INFO(node_->get_logger(), "Publishing joint state on: " + joint_topic_name);
+        RCLCPP_INFO(node_->get_logger(), "Publishing joint state on: %s", joint_topic_name.c_str());
 
         state = s;
         state->buttons[0] = 0;
@@ -250,17 +247,20 @@ public:
         pose_msg.pose.position.y /= 1000.0;
         pose_msg.pose.position.z /= 1000.0;
         pose_publisher->publish(pose_msg);
-
+        
         if ((state->buttons[0] != state->buttons_prev[0]) or (state->buttons[1] != state->buttons_prev[1]))
         {
-            if (state->buttons[0] == 1)
-            {
-                state->close_gripper = !(state->close_gripper);
-            }
-            if (state->buttons[1] == 1)
-            {
-                state->lock = !(state->lock);
-            }
+            //if (state->buttons[0] == 1)
+            //{
+            //    state->close_gripper = !(state->close_gripper);
+            //}
+            //if (state->buttons[1] == 1)
+            //{
+            //    state->lock = !(state->lock);
+            //}
+            state->close_gripper = state->buttons[0];
+            state->lock = state->buttons[1];
+            
             omni_msgs::msg::OmniButtonEvent button_event;
             button_event.grey_button = state->buttons[0];
             button_event.white_button = state->buttons[1];
